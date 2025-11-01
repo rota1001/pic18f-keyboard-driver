@@ -2,7 +2,7 @@
 
 void uart_init(void)
 {
-    unsigned long baud = 9600;
+    unsigned long baud = 230400;
     unsigned long spbrg;
 
     TXSTAbits.SYNC = 0;
@@ -72,9 +72,11 @@ void printf(const char *fmt, ...)
                 putchar(*s++);
             break;
         }
-        case 'c':
-            putchar(*fmt);
+        case 'c': {
+            char x = va_arg(vargs, char);
+            putchar(x);
             break;
+        }
         case 'd': {
             int x = va_arg(vargs, int);
             if (x < 0) {

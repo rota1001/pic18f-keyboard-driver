@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <xc.h>
 
 #pragma config OSC = HS

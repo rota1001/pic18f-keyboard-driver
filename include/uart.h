@@ -1,6 +1,5 @@
 #pragma once
 #include <defs.h>
-#include <stdarg.h>
 
 
 void uart_init(void);
