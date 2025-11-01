@@ -59,6 +59,7 @@ void usb_handler()
         printf("[!] Connection Fail\n");
         return;
     }
+
     printf("[+] Send Reset Signal\n");
     set_usb_mode(USB_MODE_RESET);
     set_usb_mode(USB_MODE_SOF);
@@ -69,6 +70,7 @@ void usb_handler()
         return;
     }
     printf("[+] USB Device Connected\n");
+
     CH375_CMD(SET_USB_SPEED);
     CH375_WRITE_DATA(USB_SPEED_LOW_SPEED);
 
@@ -81,7 +83,8 @@ void usb_handler()
         printf("[!] Get Device Descriptor Fail\n");
         return;
     }
-    printf("[+] Get Device Descriptor\n");
+    printf("[+] Got Device Descriptor\n");
+
     CH375_CMD(RD_USB_DATA);
     uint8_t len = CH375_READ();
     if (len == 18) {
@@ -116,7 +119,8 @@ void usb_handler()
         printf("[!] Get Config Descriptor Fail\n");
         return;
     }
-    printf("[+] Get Config Descriptor\n");
+    printf("[+] Got Config Descriptor\n");
+
     CH375_CMD(RD_USB_DATA);
     len = CH375_READ();
     if (len < 9)
@@ -184,21 +188,14 @@ void usb_handler()
         yee ^= 1;
 
         uint8_t addr = endpoint_descriptor.bEndpointAddress & 0xF;
-        uint8_t val = (uint8_t) (addr << 4) | DEF_USB_PID_IN;
         CH375_CMD(ISSUE_TOKEN);
-        WREG = val;
-        asm("BCF LATA, 0\n"
-            "CLRF TRISD\n"
-            "MOVWF LATD\n"
-            "BCF LATA, 1\n");
-        asm("BSF LATA, 1\n");
+        CH375_WRITE_DATA((uint8_t) (addr << 4) | DEF_USB_PID_IN);
         wait_for_interrupt();
         CH375_CMD(GET_STATUS);
-        uint8_t x = CH375_READ();
-        if (x != USB_INT_SUCCESS) {
+
+        if (CH375_READ() != USB_INT_SUCCESS) {
             CH375_CMD(GET_STATUS);
-            x = CH375_READ();
-            if (x == USB_INT_DISCONNECT)
+            if (CH375_READ() == USB_INT_DISCONNECT)
                 printf("[+] USB Disconnected\n");
             return;
         }
@@ -208,9 +205,9 @@ void usb_handler()
         len = CH375_READ();
         if (len <= 8) {
             uint8_t *ptr = buf;
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < len; i++)
                 *ptr++ = CH375_READ();
-            }
+
             /** Ignore zero key code and only use the first key code */
             if (buf[2] == 0)
                 continue;
