@@ -6,24 +6,23 @@ struct usb_interface_descriptor interface_descriptor;
 struct usb_hid_descriptor hid_descriptor;
 struct usb_endpoint_descriptor endpoint_descriptor;
 
-inline void CH375_WR(uint8_t data)
+inline void CH375_WRITE(uint8_t data)
 {
-    WREG = data;
-    asm("CLRF TRISD\n"
-        "MOVWF LATD\n"
-        "BCF LATA, 1\n"
-        "NOP\n"
-        "BSF LATA, 1\n");
+    TRISD = 0;
+    LATD = data;
+    CH375_WR = 0;
+    asm("NOP");
+    CH375_WR = 1;
 }
 
 inline uint8_t CH375_READ()
 {
-    asm("BCF LATA, 0\n"
-        "SETF TRISD\n"
-        "BCF LATA, 2\n"
-        "NOP\n"
-        "MOVF PORTD, W\n"
-        "BSF LATA, 2\n");
+    CH375_A0 = 0;
+    TRISD = 0xFF;
+    CH375_RD = 0;
+    asm("NOP");
+    uint8_t x = PORTD;
+    CH375_RD = 1;
     return WREG;
 }
 
@@ -219,7 +218,14 @@ void usb_handler()
         ;
 }
 
-extern void ch375_gpio_init(void);
+void ch375_gpio_init(void)
+{
+    TRISA &= 0b11111000;
+    TRISD = 0xFF;
+    CH375_WR = 1;
+    CH375_RD = 1;
+    TRISB0 = 1;
+}
 
 
 void ch375_init()

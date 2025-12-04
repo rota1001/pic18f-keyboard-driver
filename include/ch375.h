@@ -33,20 +33,24 @@
 #define DEF_USB_PID_IN 0x09
 
 inline uint8_t CH375_READ();
-inline void CH375_WR(uint8_t data);
+inline void CH375_WRITE(uint8_t data);
+
+#define CH375_A0 LATA0
+#define CH375_WR LATA1
+#define CH375_RD LATA2
 
 
 #define CH375_CMD(x)          \
     do {                      \
-        asm("BSF LATA, 0\n"); \
-        CH375_WR(x);          \
+        CH375_A0 = 1;         \
+        CH375_WRITE(x);       \
         __delay_us(100);      \
     } while (0)
 
 #define CH375_WRITE_DATA(x)   \
     do {                      \
-        asm("BCF LATA, 0\n"); \
-        CH375_WR(x);          \
+        CH375_A0 = 0;         \
+        CH375_WRITE(x);       \
         __delay_us(100);      \
     } while (0)
 

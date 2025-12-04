@@ -2,7 +2,7 @@
 
 void uart_init(void)
 {
-    unsigned long baud = 230400;
+    unsigned long baud = 9600;
     unsigned long spbrg;
 
     TXSTAbits.SYNC = 0;

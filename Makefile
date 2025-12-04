@@ -17,12 +17,9 @@ $(BUILD)/%.p1: src/%.c
 	@rm -f $*.d
 	@mv $(notdir $(basename $<)).p1 $@
 	
-	
-$(BUILD)/ch375.o: $(SRC)/ch375.asm
-	$(CC) -c -xassembler-with-cpp $(CFLAGS) $(SRC)/ch375.asm -o $(BUILD)/ch375.o
 
-$(BUILD)/main.elf: $(OBJS) $(BUILD)/ch375.o
-	$(CC) $(CFLAGS) $(OBJS) -o $(BUILD)/main.elf $(BUILD)/ch375.o
+$(BUILD)/main.elf: $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(BUILD)/main.elf
 
 flash:
 	./parse_config.py build/main.hex pic18f4520.fuses.conf
